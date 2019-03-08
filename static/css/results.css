@@ -1,0 +1,23 @@
+.results-container {
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    padding: 15px;
+}
+
+.results-container .result {
+    padding: 5px;
+}
+
+.results-container .result:hover {
+    background-color: #E4DFDA;
+}
+
+.results-container .result a {
+    color: #2d62d3;
+    text-decoration: unset;
+}
+
+.results-container .search-container {
+    min-height: 5vh;
+    background: unset;
+}
