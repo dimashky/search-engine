@@ -1,0 +1,39 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="author" content="damascus university">
+    <title>Index Table</title>
+    <link href="/assets/css/core.css" rel="stylesheet" />
+    <link href="/assets/css/index_table.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="title">Index Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th class="token">Token</th>
+                    <th>Documents</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows.items() %}
+                <tr>
+                    <td>{{row[0]}}</td>
+                    <td>
+                        {% for doc in row[1] %}
+                        <a href="/docs/{{doc}}" target="_blank">{{doc}}</a>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
