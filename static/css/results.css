@@ -2,6 +2,7 @@
     min-height: 100vh;
     font-family: 'Poppins', sans-serif;
     padding: 15px;
+    background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
 }
 
 .results-container .result {
@@ -9,7 +10,7 @@
 }
 
 .results-container .result:hover {
-    background-color: #E4DFDA;
+    background-color: #ebedee;
 }
 
 .results-container .result a {

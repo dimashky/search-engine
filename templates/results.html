@@ -27,20 +27,18 @@
             </form>
         </div>
         <div class="results">
-            <h2>Search Results</h2>
+            {% if results|length > 0  %}
+                <h2>Search Results ({{results|length}} found)</h2>
                 {% for value in results %}
                 <div class="result">
-                    <h4><a href="#">{{value}}</a></h4>
+                    <h4><a href="/docs/{{value}}" target="_blank">{{value}}</a></h4>
                 </div>
-             {% endfor %}
+                {% endfor %}
+            {% else %}
+                <h2 class="text-center">No Results</h2>
+            {% endif %}
         </div>
     </div>
-    <script src="/assets/js/extention/choices.js"></script>
-    <script>
-        const choices = new Choices('[data-trigger]', {
-            searchEnabled: false
-        });
-    </script>
 </body>
 
 </html>

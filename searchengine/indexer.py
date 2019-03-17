@@ -1,3 +1,5 @@
+import json
+import nltk
 import string
 from os import listdir
 from os.path import isfile, join
@@ -5,8 +7,6 @@ from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize
 from collections import OrderedDict
-import json
-import nltk
 
 stop_words = set(stopwords.words('english')) 
 pos_tag_preferred = ['VB', 'VBG', 'VBD', 'JJ', 'NN', 'NNP', 'NNS']
@@ -19,15 +19,18 @@ def getFilesInDir(dir):
 
 def getDocTokens(filePath):
     file = open(filePath, "r")
+    return getTokens(file.read())
+
+def getTokens(txt):
     # tokenizing the doc content
-    doc_tokens = word_tokenize(file.read())
+    tokens = word_tokenize(txt)
     # filtered mean without stop words and punctuation
-    filtered_doc_tokens = [w for w in doc_tokens if not w in stop_words and not w in string.punctuation and is_ascii(w)] 
+    filtered_tokens = [w for w in tokens if not w in stop_words and not w in string.punctuation and is_ascii(w)] 
     # preferred mean take only specific Parts Of Speach (pos) tags 
-    preferred_doc_tokens = [w[0] for w in nltk.pos_tag(filtered_doc_tokens) if w[1] in pos_tag_preferred]
+    preferred_tokens = [w[0] for w in nltk.pos_tag(filtered_tokens) if w[1] in pos_tag_preferred]
     # stemming
-    stemmed_doc_tokens = [PorterStemmer().stem(w) for w in preferred_doc_tokens]
-    return stemmed_doc_tokens
+    stemmed_tokens = [PorterStemmer().stem(w) for w in preferred_tokens]
+    return stemmed_tokens
 
 def index(fresh = False, dir = './docs/'):
     # fresh mean create new index table.

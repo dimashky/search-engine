@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, send_from_directory
-from searchengine import indexer
+from searchengine import indexer, matcher
 import json
 
 app = Flask(__name__)
@@ -11,8 +11,9 @@ def home():
 
 @app.route('/search')
 def search():
-    results = request.args.get('terms').split()
-    return render_template('results.html', results = results, query = request.args.get('terms'))
+    query = request.args.get('terms')
+    results = matcher.match(query)
+    return render_template('results.html', results = results, query = query)
 
 @app.route('/assets/<path:path>')
 def sendAsset(path):
