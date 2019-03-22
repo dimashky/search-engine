@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, send_from_directory
-from searchengine import indexer, matcher
+from searchengine import indexer, matcher, queryspellchecker
 import json
 
 app = Flask(__name__)
@@ -13,7 +13,8 @@ def home():
 def search():
     query = request.args.get('terms')
     results = matcher.match(query)
-    return render_template('results.html', results = results, query = query)
+    suggested_query = queryspellchecker.getSuggestedQuery(query)
+    return render_template('results.html', results = results, query = query, suggested_query = suggested_query)
 
 @app.route('/assets/<path:path>')
 def sendAsset(path):

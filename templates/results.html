@@ -27,6 +27,9 @@
             </form>
         </div>
         <div class="results">
+            {% if suggested_query != query %}
+            Did you mean?  <b>{{suggested_query}}</b>
+            {% endif %}
             {% if results|length > 0  %}
                 <h2>Search Results ({{results|length}} found)</h2>
                 {% for value in results %}

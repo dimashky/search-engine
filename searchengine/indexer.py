@@ -17,6 +17,9 @@ def is_ascii(s):
 def getFilesInDir(dir):
     return [f for f in listdir(dir) if isfile(join(dir, f))]
 
+def tokenize(query):
+    return word_tokenize(query)
+
 def getDocTokens(filePath):
     file = open(filePath, "r")
     return getTokens(file.read())
