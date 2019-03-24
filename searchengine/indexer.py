@@ -3,13 +3,23 @@ import nltk
 import string
 from os import listdir
 from os.path import isfile, join
-from nltk.stem import PorterStemmer
+from nltk import ngrams
+from nltk.stem import WordNetLemmatizer, LancasterStemmer
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize
 from collections import OrderedDict
 
+lemmatizer = WordNetLemmatizer() 
+stemmer = LancasterStemmer()
 stop_words = set(stopwords.words('english')) 
 pos_tag_preferred = ['VB', 'VBG', 'VBD', 'JJ', 'NN', 'NNP', 'NNS']
+
+def loadStopWords():
+    file = open('./storage/stop_words.txt')
+    text = file.read()
+    return [w for w in text.split('\n') if w]
+        
+my_stop_words = loadStopWords()
 
 def is_ascii(s):
     return all(ord(c) < 128 for c in s)
@@ -25,18 +35,13 @@ def getDocTokens(filePath):
     return getTokens(file.read())
 
 def getTokens(txt):
-    # tokenizing the doc content
     tokens = word_tokenize(txt)
-    # filtered mean without stop words and punctuation
-    filtered_tokens = [w for w in tokens if not w in stop_words and not w in string.punctuation and is_ascii(w)] 
-    # preferred mean take only specific Parts Of Speach (pos) tags 
+    filtered_tokens = [w.strip('.') for w in tokens if not w in string.punctuation and not w in my_stop_words and is_ascii(w)] 
     preferred_tokens = [w[0] for w in nltk.pos_tag(filtered_tokens) if w[1] in pos_tag_preferred]
-    # stemming
-    stemmed_tokens = [PorterStemmer().stem(w) for w in preferred_tokens]
+    stemmed_tokens = [stemmer.stem(lemmatizer.lemmatize(w)) for w in preferred_tokens]
     return stemmed_tokens
 
 def index(fresh = False, dir = './docs/'):
-    # fresh mean create new index table.
     if not fresh:
         try:
             return loadIndexTable()
@@ -47,7 +52,6 @@ def index(fresh = False, dir = './docs/'):
     index_table = {}
     for file in files:
         tokens = getDocTokens(dir + file)
-        # update or create index table with recently fetched tokens
         for token in tokens:
             if token not in index_table.keys():
                 index_table[token] = [file]
