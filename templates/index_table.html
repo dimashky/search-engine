@@ -31,7 +31,7 @@
                     <td v-html="key"></td>
                     <td>
                         <template v-for="doc in value">
-                            <a href="/docs/{{doc}}" target="_blank" v-html="doc"></a>
+                            <a :href="'/docs/'+doc" target="_blank" v-html="doc"></a>
                             <span> </span>
                         </template>
                     </td>
