@@ -1,93 +1,96 @@
 <html>
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="author" content="damascus university">
-    <title>Index Table</title>
-    <link href="/assets/css/core.css" rel="stylesheet" />
-    <link href="/assets/css/index_table.css" rel="stylesheet" />
-</head>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="author" content="damascus university">
+        <title>Index Table</title>
+        <link href="/assets/css/core.css" rel="stylesheet" />
+        <link href="/assets/css/index_table.css" rel="stylesheet" />
+    </head>
 
-<body>
-    <div id="app" class="container">
-        <h1 class="title">Index Table <sub><a href="/index-table?fresh=true" class="new-version-link">new version?</a></s></h1>
+    <body>
+        <div id="app" class="container">
+            <h1 class="title">Index Table <sub><a href="/index-table?fresh=true" class="new-version-link">new
+                        version?</a></s></h1>
             <div class="text-center">
                 <input placeholder="search" type="text" v-model="search_key">
             </div>
             <div class="pagination">
-                <a v-for="(link,idx) in links" href="javascript:void(0)" v-html="idx+1" :class="idx == current ? 'active' : ''" @click="page(idx)"></a>
+                <a v-for="(link,idx) in links" href="javascript:void(0)" v-html="idx+1"
+                    :class="idx == current ? 'active' : ''" @click="page(idx)"></a>
             </div>
-        <table id="index-table">
-            <thead>
-                <tr>
-                    <th class="token">Token</th>
-                    <th>Documents</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(value, key, idx) in items">
-                    <td v-html="key"></td>
-                    <td>
-                        <template v-for="doc in value">
-                            <a :href="'/docs/'+doc" target="_blank" v-html="doc"></a>
-                            <span> </span>
-                        </template>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="pagination">
-            <a v-for="(link,idx) in links" href="javascript:void(0)" v-html="idx+1" :class="idx == current ? 'active' : ''" @click="page(idx)"></a>
+            <table id="index-table">
+                <thead>
+                    <tr>
+                        <th class="token">Token</th>
+                        <th>Documents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(value, key, idx) in items">
+                        <td v-html="key"></td>
+                        <td>
+                            <template v-for="doc in value">
+                                <a :href="'/docs/'+doc[0]" target="_blank" v-html="doc"></a>
+                                <span> </span>
+                            </template>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <a v-for="(link,idx) in links" href="javascript:void(0)" v-html="idx+1"
+                    :class="idx == current ? 'active' : ''" @click="page(idx)"></a>
+            </div>
         </div>
-    </div>
-    <script src="/assets/js/extention/vue.js"></script>
-    <script>
-        var data = {{ rows|tojson  }};
-        var keys = Object.keys(data);
-        var values = Object.values(data);
-        var max_items = 700;
+        <script src="/assets/js/extention/vue.js"></script>
+        <script>
+            var data = {{ rows| tojson  }};
+            var keys = Object.keys(data);
+            var values = Object.values(data);
+            var max_items = 700;
 
-        console.log(data)
-        new Vue({
-            el: "#app",
-            data:{
-                items: {},
-                links: new Array(Math.ceil(Object.keys(data).length/max_items)),
-                current: 0,
-                search_key: ""
-            },
-            mounted(){
-                this.page(0);
-            },
-            watch:{
-                search_key(val){
-                    this.search(val);
-                }
-            },
-            methods:{
-                page(page){
-                    this.current = page;
-                    let tmp = {};
-                    for(let i = page * max_items; i < (page+1)*max_items && i < keys.length; ++i){
-                        tmp[keys[i]] = values[i];
-                    }
-                    this.items = tmp;
+            console.log(data)
+            new Vue({
+                el: "#app",
+                data: {
+                    items: {},
+                    links: new Array(Math.ceil(Object.keys(data).length / max_items)),
+                    current: 0,
+                    search_key: ""
                 },
-                search(word) {
-                    let temp_keys = keys.filter(function(key){ return key.includes(word)}), tmp_items = {};
-                    this.current = 0;
-                    this.items = {};
-                    this.links= new Array(Math.ceil(temp_keys.length/max_items));
-                    for(let i = 0; i < max_items && i < temp_keys.length; ++i){
-                            tmp_items[temp_keys[i]] = data[temp_keys[i]];
+                mounted() {
+                    this.page(0);
+                },
+                watch: {
+                    search_key(val) {
+                        this.search(val);
                     }
-                    this.items = tmp_items;
+                },
+                methods: {
+                    page(page) {
+                        this.current = page;
+                        let tmp = {};
+                        for (let i = page * max_items; i < (page + 1) * max_items && i < keys.length; ++i) {
+                            tmp[keys[i]] = values[i];
+                        }
+                        this.items = tmp;
+                    },
+                    search(word) {
+                        let temp_keys = keys.filter(function (key) { return key.includes(word) }), tmp_items = {};
+                        this.current = 0;
+                        this.items = {};
+                        this.links = new Array(Math.ceil(temp_keys.length / max_items));
+                        for (let i = 0; i < max_items && i < temp_keys.length; ++i) {
+                            tmp_items[temp_keys[i]] = data[temp_keys[i]];
+                        }
+                        this.items = tmp_items;
+                    }
                 }
-            }
-        })
-    </script>
-</body>
+            })
+        </script>
+    </body>
 
 </html>

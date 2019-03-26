@@ -47,8 +47,8 @@ def getCorrectQuery(query_tokens):
         if(t in index_table.keys()):
             correct_query_token.append(t)
         # else correct it with any algo
-        else:
-            correct_query_token.append(getCorrectWordUsingBigramIndex(t))
+        # else:
+            # correct_query_token.append(getCorrectWordUsingBigramIndex(t))
     return correct_query_token
 
 
