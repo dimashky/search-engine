@@ -40,9 +40,9 @@ def getDocContent(filePath):
     file = open(filePath, "r")
     return file.read()
 
-def getDocTokens(filePath, without_relevance = True):
+def getDocTokens(filePath, with_relevance = True):
     tokens = getTokens(getDocContent(filePath))
-    if(without_relevance):
+    if(with_relevance):
         tokens = [(token, tokens.count(token)) for token in set(tokens)]
     return tokens
 
@@ -116,21 +116,23 @@ def index(fresh=False, dir='./docs/'):
     soundex_index = {}
     bigram_index = {}
     index_table = {}
+
     for file in files:
         tokens = getDocTokens(dir + file)
         for token in tokens:
-            if token not in index_table.keys():
 
-                index_table[token[0]] = [(file, token[1])]
-                soundex_index[token[0]] = getPhoneticHash(token[0])
-                bigram = getBigramForWord(token[0])
-                for c in bigram:
-                    if c not in bigram_index.keys():
-                        bigram_index[c] = [token[0]]
-                    else:
-                        bigram_index[c].append(token[0])
-            elif file not in index_table[token]:
+            if token[0] in index_table.keys():
                 index_table[token[0]].append((file, token[1]))
+                continue
+
+            index_table[token[0]] = [(file, token[1])]
+            soundex_index[token[0]] = getPhoneticHash(token[0])
+            bigram = getBigramForWord(token[0])
+            for c in bigram:
+                if c not in bigram_index.keys():
+                    bigram_index[c] = [token[0]]
+                else:
+                    bigram_index[c].append(token[0])
 
     # sort the dictionary for binary search
     index_table = OrderedDict(sorted(index_table.items(), key=lambda t: t[0]))
