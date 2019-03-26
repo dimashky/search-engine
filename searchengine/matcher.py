@@ -30,7 +30,7 @@ def getDocuments(dimensions):
         for dim in dimensions:
             docs = [doc[0] for doc in index_table[dim]]
             for doc in docs:
-                if (doc[0] not in documents):
+                if (doc not in documents):
                     documents[doc] = makeVector(doc, dimensions)
     except:
         pass
