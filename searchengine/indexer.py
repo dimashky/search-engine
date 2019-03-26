@@ -8,6 +8,7 @@ from nltk.stem import WordNetLemmatizer, LancasterStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from collections import OrderedDict
+#import fuzzy
 
 lemmatizer = WordNetLemmatizer()
 stemmer = LancasterStemmer()
@@ -67,6 +68,33 @@ def getTokens(txt):
     return final_tokens
 
 
+def getBigramForWord(word):
+    bigram = []
+    word = list(word)
+    # first char
+    bigram.append('$' + word[0])
+    i = 0
+    while i < (len(word)-1):
+        bigram.append(word[i]+word[i+1])
+        i += 1
+    # last char
+    bigram.append(word[len(word)-1] + '$')
+    return bigram
+
+
+def bigramIndex():
+    return loadIndexTable('./storage/bigram_index.json')
+
+
+def soundexIndex():
+    return loadIndexTable('./storage/soundex_index.json')
+
+
+def getPhoneticHash(word):
+    # soundex = fuzzy.Soundex(4)
+    return word
+
+
 def index(fresh=False, dir='./docs/'):
     if not fresh:
         try:
@@ -75,19 +103,39 @@ def index(fresh=False, dir='./docs/'):
             print("Error while loading INDEX TABLE, continue with new version")
 
     files = getFilesInDir(dir)
+    # index for spelling correction
+    # bigram index for isolated tem correction and context sensitive correction
+    # soundec index for phonetic correction
+    soundex_index = {}
+    bigram_index = {}
     index_table = {}
     for file in files:
         tokens = getDocTokens(dir + file)
         for token in tokens:
             if token not in index_table.keys():
+
                 index_table[token[0]] = [(file, token[1])]
+                soundex_index[token[0]] = getPhoneticHash(token[0])
+                bigram = getBigramForWord(token[0])
+                for c in bigram:
+                    if c not in bigram_index.keys():
+                        bigram_index[c] = [token[0]]
+                    else:
+                        bigram_index[c].append(token[0])
             elif file not in index_table[token]:
                 index_table[token[0]].append((file, token[1]))
+
     # sort the dictionary for binary search
     index_table = OrderedDict(sorted(index_table.items(), key=lambda t: t[0]))
+    bigram_index = OrderedDict(
+        sorted(bigram_index.items(), key=lambda t: t[0]))
+    soundex_index = OrderedDict(
+        sorted(soundex_index.items(), key=lambda t: t[0]))
     # Saving index table to a file
     try:
         saveIndexTable(index_table)
+        saveIndexTable(bigram_index, './storage/bigram_index.json')
+        saveIndexTable(soundex_index, './storage/soundex_index.json')
     except:
         print("Error while SAVING INDEX TABLE, continue without saving")
     return index_table
