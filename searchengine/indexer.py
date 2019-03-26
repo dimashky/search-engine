@@ -1,6 +1,7 @@
 import json
 import nltk
 import string
+import re
 from os import listdir
 from os.path import isfile, join
 from nltk import ngrams
@@ -18,7 +19,7 @@ def loadStopWords():
     file = open('./storage/stop_words.txt')
     text = file.read()
     return [w for w in text.split('\n') if w]
-        
+
 my_stop_words = loadStopWords()
 
 def is_ascii(s):
@@ -30,9 +31,12 @@ def getFilesInDir(dir):
 def tokenize(query):
     return word_tokenize(query)
 
-def getDocTokens(filePath):
+def getDocContent(filePath):
     file = open(filePath, "r")
-    return getTokens(file.read())
+    return file.read()
+
+def getDocTokens(filePath):
+    return getTokens(getDocContent(filePath))
 
 def getTokens(txt):
     tokens = word_tokenize(txt)
@@ -40,6 +44,15 @@ def getTokens(txt):
     preferred_tokens = [w[0] for w in nltk.pos_tag(filtered_tokens) if w[1] in pos_tag_preferred]
     stemmed_tokens = [stemmer.stem(lemmatizer.lemmatize(w)) for w in preferred_tokens]
     return stemmed_tokens
+
+def termFrequency(document, term):
+    return len(re.finditer(term, document))
+
+def documentFrequency(corpus_path, term):
+    return len([set([term]) & set(getDocTokens(file)) for file in getFilesInDir(corpus_path)])
+
+def corpusFrequency(corpus_path, term):
+    return sum([termFrequency(getDocContent(file), term) for file in getFilesInDir(corpus_path)])
 
 def index(fresh = False, dir = './docs/'):
     if not fresh:
