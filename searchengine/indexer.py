@@ -9,7 +9,45 @@ from nltk.stem import WordNetLemmatizer, LancasterStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from collections import OrderedDict
-#import fuzzy
+from nltk.tag.stanford import StanfordNERTagger
+import os
+# import fuzzy
+
+java_path = "C:/Program Files/Java/jdk1.8.0_171/bin/java.exe"
+os.environ['JAVAHOME'] = java_path
+
+
+def formatted_entities(classified_tokens, with_tag=False):
+    entities = {'persons': list(), 'organizations': list(),
+                'locations': list(), 'date': list()}
+
+    for entry in classified_tokens:
+        entry_value = entry[0]
+        entry_type = entry[1]
+
+        if entry_type == 'PERSON':
+            entities['persons'].append(entry_value)
+
+        elif entry_type == 'ORGANIZATION':
+            entities['organizations'].append(entry_value)
+
+        elif entry_type == 'LOCATION':
+            entities['locations'].append(entry_value)
+
+        elif entry_type == 'DATE':
+            entities['date'].append(entry_value)
+
+    if (with_tag):
+        return entities
+
+    output = entities['persons'] + entities['locations']
+
+    return output
+
+
+tagger = StanfordNERTagger('C:/Users/Asus/Desktop/stanford-ner/classifiers/english.muc.7class.distsim.crf.ser.gz',
+                           'C:/Users/Asus/Desktop/stanford-ner/stanford-ner.jar',
+                           encoding='utf-8')
 
 lemmatizer = WordNetLemmatizer()
 stemmer = LancasterStemmer()
@@ -21,6 +59,7 @@ def loadStopWords():
     file = open('./storage/stop_words.txt')
     text = file.read()
     return [w for w in text.split('\n') if w]
+
 
 my_stop_words = loadStopWords()
 
@@ -36,47 +75,69 @@ def getFilesInDir(dir):
 def tokenize(query):
     return word_tokenize(query)
 
+
 def getDocContent(filePath):
     file = open(filePath, "r")
     return file.read()
 
-def getDocTokens(filePath, with_relevance = True):
-    tokens = getTokens(getDocContent(filePath))
+
+def getDocTokens(filePath, with_relevance=True):
+    tokens_with_pos = getTokens(getDocContent(filePath))
+    tokens = []
     if(with_relevance):
-        tokens = [(token, tokens.count(token)) for token in set(tokens)]
+        tokens = [(token[0], tokens_with_pos.count(token) + (5 if token[1] in ["persons", "locations"] else 0), token[1])
+                  for token in set(tokens_with_pos)]
+    else:
+        tokens = [token[0] for token in tokens_with_pos]
     return tokens
+
 
 def getTokens(txt):
     tokens = word_tokenize(txt)
     filtered_tokens = [
         w.strip('.') for w in tokens if not w in string.punctuation and not w in my_stop_words and is_ascii(w)
     ]
+    classified_tokens_list = tagger.tag(filtered_tokens)
+    formatted_result = formatted_entities(classified_tokens_list, True)
+    entities = formatted_result['persons'] + formatted_result['locations']
+
     tokens_with_pos = [
         w for w in nltk.pos_tag(filtered_tokens) if w[1][0] in ["V", "N", "J", "R"]
     ]
 
     final_tokens = []
     for t in tokens_with_pos:
+        if (t[0] in entities):
+            key = [key for key in formatted_result if t[0]
+                   in formatted_result[key]][0]
+            final_tokens.append((t[0].lower(), key))
+            continue
+
         word = ""
         token = t[0].lower()
+
         if (t[1][0] == "V"):
-            word = lemmatizer.lemmatize(token, "v")
+            word = (lemmatizer.lemmatize(token, "v"), "verb")
         elif (t[1][0] in ["R", "J"]):
-            word = lemmatizer.lemmatize(token, "a")
+            word = (lemmatizer.lemmatize(token, "a"), "noun")
         else:
-            word = stemmer.stem(token)
+            word = (stemmer.stem(token), "noun")
         final_tokens.append(word)
 
     return final_tokens
 
+
 def termFrequency(document, term):
     return len(re.finditer(term, document))
+
 
 def documentFrequency(corpus_path, term):
     return len([set([term]) & set(getDocTokens(file, False)) for file in getFilesInDir(corpus_path)])
 
+
 def corpusFrequency(corpus_path, term):
     return sum([termFrequency(getDocContent(file), term) for file in getFilesInDir(corpus_path)])
+
 
 def getBigramForWord(word):
     bigram = []
@@ -91,11 +152,14 @@ def getBigramForWord(word):
     bigram.append(word[len(word)-1] + '$')
     return bigram
 
+
 def bigramIndex():
     return loadIndexTable('./storage/bigram_index.json')
 
+
 def soundexIndex():
     return loadIndexTable('./storage/soundex_index.json')
+
 
 def getPhoneticHash(word):
     # soundex = fuzzy.Soundex(4)
@@ -118,6 +182,7 @@ def index(fresh=False, dir='./docs/'):
     index_table = {}
 
     for file in files:
+        print(dir + file)
         tokens = getDocTokens(dir + file)
         for token in tokens:
 

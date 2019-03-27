@@ -3,6 +3,7 @@ from numpy import dot
 from numpy.linalg import norm
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
+from operator import itemgetter
 
 index_table = indexer.index()
 bigram_index = indexer.bigramIndex()
@@ -76,7 +77,7 @@ def getCorrectWordUsingSoundexIndex(word):
 
 
 def match(query):
-    query_tokens = indexer.getTokens(query)
+    query_tokens = [token[0] for token in indexer.getTokens(query)]
     query_tokens = getCorrectQuery(query_tokens)
     query_vector = [1] * len(query_tokens)
     documents = getDocuments(query_tokens)
@@ -84,6 +85,6 @@ def match(query):
     for doc in documents:
         relevance_document[doc] = cos(query_vector, documents[doc])
     relevance_document = OrderedDict(
-        sorted(relevance_document.items(), key=lambda kv: kv[1], reverse=True))
+        sorted(relevance_document.items(), key=itemgetter(1), reverse=True))
     return relevance_document.keys()
     # return query_tokens
