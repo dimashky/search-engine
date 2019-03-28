@@ -22,3 +22,8 @@
     min-height: 5vh;
     background: unset;
 }
+
+span.relevance{
+    font-weight: 100;
+    font-size: 11px;
+}

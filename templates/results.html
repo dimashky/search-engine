@@ -32,9 +32,9 @@
             {% endif %}
             {% if results|length > 0  %}
                 <h2>Search Results ({{results|length}} found)</h2>
-                {% for value in results %}
+                {% for doc, relevance in results.items() %}
                 <div class="result">
-                    <h4><a href="/docs/{{value}}" target="_blank">{{value}}</a></h4>
+                    <h4><a href="/docs/{{doc}}" target="_blank">{{doc}}</a> <span class="relevance">({{'%0.4f'| format(relevance|float)}})</span></h4>
                 </div>
                 {% endfor %}
             {% else %}

@@ -4,6 +4,7 @@ from numpy.linalg import norm
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
+from scipy import spatial
 
 index_table = indexer.index()
 bigram_index = indexer.bigramIndex()
@@ -82,9 +83,13 @@ def match(query):
     query_vector = [1] * len(query_tokens)
     documents = getDocuments(query_tokens)
     relevance_document = {}
+
     for doc in documents:
-        relevance_document[doc] = cos(query_vector, documents[doc])
+        relevance_document[doc] = cos_similarity = 1 - spatial.distance.cosine(query_vector, documents[doc])
+        if(cos_similarity == 1):
+            relevance_document[doc] = sum(documents[doc])/len(documents[doc])
+
     relevance_document = OrderedDict(
         sorted(relevance_document.items(), key=itemgetter(1), reverse=True))
-    return relevance_document.keys()
+    return relevance_document
     # return query_tokens
