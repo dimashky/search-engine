@@ -31,11 +31,13 @@
             Did you mean?  <b>{{suggested_query}}</b>
             {% endif %}
             {% if results|length > 0  %}
+                {% set vars={'counter': 1}  %}
                 <h2>Search Results ({{results|length}} found)</h2>
                 {% for doc, relevance in results.items() %}
                 <div class="result">
-                    <h4><a href="/docs/{{doc}}" target="_blank">{{doc}}</a> <span class="relevance">({{'%0.4f'| format(relevance|float)}})</span></h4>
+                    <h4>{{vars['counter']}}. <a href="/docs/{{doc}}" target="_blank">{{doc}}</a> <span class="relevance">({{'%0.4f'| format(relevance|float)}})</span></h4>
                 </div>
+                {% if vars.update({'counter': vars.counter + 1}) %} {% endif %}
                 {% endfor %}
             {% else %}
                 <h2 class="text-center">No Results</h2>
