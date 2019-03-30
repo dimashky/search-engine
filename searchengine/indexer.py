@@ -13,9 +13,8 @@ from nltk.tag.stanford import StanfordNERTagger
 import os
 # import fuzzy
 
-java_path = "C:/Program Files/Java/jdk1.8.0_171/bin/java.exe"
+java_path = "C:/Program Files/Java/jdk1.8.0_181/bin/java.exe"
 os.environ['JAVAHOME'] = java_path
-
 
 def formatted_entities(classified_tokens, with_tag=False):
     entities = {'persons': list(), 'organizations': list(),
@@ -45,8 +44,8 @@ def formatted_entities(classified_tokens, with_tag=False):
     return output
 
 
-tagger = StanfordNERTagger('C:/Users/Asus/Desktop/stanford-ner/classifiers/english.muc.7class.distsim.crf.ser.gz',
-                           'C:/Users/Asus/Desktop/stanford-ner/stanford-ner.jar',
+tagger = StanfordNERTagger('C:/searchengine/stanford-ner/classifiers/english.muc.7class.distsim.crf.ser.gz',
+                           'C:/searchengine/stanford-ner/stanford-ner.jar',
                            encoding='utf-8')
 
 lemmatizer = WordNetLemmatizer()
