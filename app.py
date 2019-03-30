@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, send_from_directory
-from searchengine import indexer, matcher, queryspellchecker
+from searchengine import indexer, matcher, queryspellchecker, tester
 import json
 
 app = Flask(__name__)
@@ -47,6 +47,11 @@ def bigramIndex():
 @app.route('/soundex_index')
 def soundexIndex():
     return render_template('index_table.html', rows=indexer.soundexIndex())
+
+
+@app.route('/test_cases')
+def testCases():
+    return render_template('test_cases.html', rows=tester.createTestCases())
 
 
 if __name__ == '__main__':
