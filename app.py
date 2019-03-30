@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, send_from_directory
-from searchengine import indexer, matcher, queryspellchecker, tester
+from searchengine import indexer, matcher, queryspellchecker, tester, loader
 import json
 
 app = Flask(__name__)
@@ -30,7 +30,7 @@ def sendDoc(path):
 
 @app.route('/docs')
 def getDocs():
-    return json.dumps(indexer.getFilesInDir('./docs/'))
+    return json.dumps(loader.getFilesInDir('./docs/'))
 
 
 @app.route('/index-table')
@@ -51,7 +51,8 @@ def soundexIndex():
 
 @app.route('/test_cases')
 def testCases():
-    return render_template('test_cases.html', rows=tester.createTestCases())
+    fresh = request.args.get('fresh')
+    return render_template('test_cases.html', rows=tester.test(fresh))
 
 
 if __name__ == '__main__':

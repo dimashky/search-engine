@@ -1,17 +1,11 @@
 from searchengine import indexer
-from numpy import dot
-from numpy.linalg import norm
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
 from scipy import spatial
 
-index_table = indexer.index()
-bigram_index = indexer.bigramIndex()
-soundex_index = indexer.soundexIndex()
-
-
 def makeVector(document, dimensions):
+    index_table = indexer.index()
     try:
         vector = []
         for dim in dimensions:
@@ -27,6 +21,7 @@ def makeVector(document, dimensions):
 
 
 def getDocuments(dimensions):
+    index_table = indexer.index()
     documents = {}
     try:
         for dim in dimensions:
@@ -38,12 +33,8 @@ def getDocuments(dimensions):
         pass
     return documents
 
-
-def cos(v1, v2):
-    return float(dot(v1, v2) / (norm(v1) * norm(v2)))
-
-
 def getCorrectQuery(query_tokens):
+    index_table = indexer.index()
     correct_query_token = []
     for t in query_tokens:
         if(t in index_table.keys()):
@@ -55,6 +46,7 @@ def getCorrectQuery(query_tokens):
 
 
 def getCorrectWordUsingBigramIndex(word):
+    bigram_index = indexer.bigramIndex()
     possible_words = {}
     levenshtein = Levenshtein()
     bigram = indexer.getBigramForWord(word)
@@ -70,6 +62,7 @@ def getCorrectWordUsingBigramIndex(word):
 
 
 def getCorrectWordUsingSoundexIndex(word):
+    soundex_index = indexer.soundexIndex()
     phonetic_hash = indexer.getPhoneticHash(word)
     for term, hash in soundex_index:
         if(hash == phonetic_hash):
@@ -78,6 +71,7 @@ def getCorrectWordUsingSoundexIndex(word):
 
 
 def match(query):
+    query = query.lower()
     query_tokens = [token[0] for token in indexer.getTokens(query)]
     query_tokens = getCorrectQuery(query_tokens)
     query_vector = [1] * len(query_tokens)

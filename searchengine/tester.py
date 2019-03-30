@@ -1,61 +1,31 @@
-from os import listdir
-from os.path import isfile, join
-import json
-from searchengine import matcher
-
+from searchengine import matcher, loader
 
 def loadQueries():
-    file = open('./storage/queries.txt')
-    text = file.read()
-    return [w for w in text.split('\n') if w]
-
+    queries = loader.loadFile('./storage/queries.txt')
+    return [q for q in queries.split('\n') if q]
 
 def loadRelevance():
-    file = open('./storage/relevance.txt')
-    text = file.read()
-    final_relevance = []
+    text = loader.loadFile('./storage/relevance.txt')
     relevances = [r for r in text.split('\n') if r]
-    for relevance in relevances:
-        final_relevance.append(relevance.split())
-
+    final_relevance = [relevance.split() for relevance in relevances ]
     return final_relevance
 
-
-def createTestCases():
+def test(fresh = False):
     queries = loadQueries()
     relevances = loadRelevance()
-   # return json.loads(open('./storage/test_cases.json', "r").read())
+    
+    if(not fresh):
+        cached_results = loader.loadJsonFile('./storage/test_cases.json')
+        if(cached_results):
+            return cached_results
 
     test_cases = {}
     for query, relevance in zip(queries, relevances):
-        results = list(matcher.match(query).keys())
+        results = list(matcher.match(query.lower()).keys())
         results = [r.replace(".txt", "") for r in results]
         shared_res = set(relevance) & set(results)
-
-        print(shared_res)
         test_cases[query] = [(doc, results.index(doc) + 1 if doc in results else -1)
                              for doc in shared_res]
 
-    try:
-        saveTestCases(test_cases)
-    except:
-        print("Error while SAVING TEST CASES, continue without saving")
+    loader.saveJsonFile('./storage/test_cases.json', test_cases)
     return test_cases
-
-
-def saveTestCases(test_cases, path='./storage/test_cases.json'):
-    file = open(path, "w")
-    file.write(json.dumps(test_cases))
-
-
-def loadTestCase(path='./storage/test_cases.json'):
-    file = open(path, "r")
-    return json.loads(file.read())
-
-
-def testCases():
-    return loadTestCase('./storage/test_cases.json')
-
-
-def runTest():
-    test_cases = testCases()
