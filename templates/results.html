@@ -1,49 +1,51 @@
 <html>
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="author" content="damascus university">
-    <title>Results</title>
-    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
-    <link href="/assets/css/core.css" rel="stylesheet" />
-    <link href="/assets/css/search.css" rel="stylesheet" />
-    <link href="/assets/css/results.css" rel="stylesheet" />
-</head>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="author" content="damascus university">
+        <title>Results</title>
+        <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
+        <link href="/assets/css/core.css" rel="stylesheet" />
+        <link href="/assets/css/search.css" rel="stylesheet" />
+        <link href="/assets/css/results.css" rel="stylesheet" />
+    </head>
 
-<body>
-    <div class="results-container">
-        <div class="search-container">
-            <form action="/search" method="GET">
-                <div class="inner-form">
-                    <div class="input-field first-wrap">
-                        <input id="search" type="text" name="terms" value="{{query}}" placeholder="What are you looking for?" />
+    <body>
+        <div class="results-container">
+            <div class="search-container">
+                <form action="/search" method="GET">
+                    <div class="inner-form">
+                        <div class="input-field first-wrap">
+                            <input id="search" type="text" name="terms" value="{{query}}"
+                                placeholder="What are you looking for?" />
+                        </div>
+                        <div class="input-field third-wrap">
+                            <button class="btn-search" type="submit">SEARCH</button>
+                        </div>
                     </div>
-                    <div class="input-field third-wrap">
-                        <button class="btn-search" type="submit">SEARCH</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="results">
-            {% if suggested_query != query %}
-            Did you mean?  <b>{{suggested_query}}</b>
-            {% endif %}
-            {% if results|length > 0  %}
+                </form>
+            </div>
+            <div class="results">
+                {% if suggested_query != query %}
+                Did you mean? <b>{{suggested_query}}</b>
+                {% endif %}
+                {% if results|length > 0  %}
                 {% set vars={'counter': 1}  %}
                 <h2>Search Results ({{results|length}} found)</h2>
                 {% for doc, relevance in results.items() %}
                 <div class="result">
-                    <h4>{{vars['counter']}}. <a href="/docs/{{doc}}" target="_blank">{{doc}}</a> <span class="relevance">({{'%0.4f'| format(relevance|float)}})</span></h4>
+                    <h4>{{vars['counter']}}. <a href="/docs/{{doc}}" target="_blank">{{doc}}</a> <span
+                            class="relevance">({{'%0.4f'| format(relevance|float)}})</span></h4>
                 </div>
                 {% if vars.update({'counter': vars.counter + 1}) %} {% endif %}
                 {% endfor %}
-            {% else %}
+                {% else %}
                 <h2 class="text-center">No Results</h2>
-            {% endif %}
+                {% endif %}
+            </div>
         </div>
-    </div>
-</body>
+    </body>
 
 </html>

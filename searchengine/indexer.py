@@ -165,12 +165,19 @@ def getPhoneticHash(word):
     return word
 
 
+index_table_cached = False
+
+
 def index(fresh=False, dir='./docs/'):
     if not fresh:
         try:
-            return loadIndexTable()
+            index_table_cached = loadIndexTable()
+            return index_table_cached
         except:
             print("Error while loading INDEX TABLE, continue with new version")
+
+    if (index_table_cached != False):
+        return index_table_cached
 
     files = getFilesInDir(dir)
     # index for spelling correction
@@ -211,6 +218,7 @@ def index(fresh=False, dir='./docs/'):
         saveIndexTable(soundex_index, './storage/soundex_index.json')
     except:
         print("Error while SAVING INDEX TABLE, continue without saving")
+    index_table_cached = index_table
     return index_table
 
 

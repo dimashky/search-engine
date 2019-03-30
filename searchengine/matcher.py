@@ -92,4 +92,3 @@ def match(query):
     relevance_document = OrderedDict(
         sorted(relevance_document.items(), key=itemgetter(1), reverse=True))
     return relevance_document
-    # return query_tokens

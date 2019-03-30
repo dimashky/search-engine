@@ -1,0 +1,45 @@
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="author" content="damascus university">
+        <title>Test Cases</title>
+        <link href="/assets/css/core.css" rel="stylesheet" />
+        <link href="/assets/css/index_table.css" rel="stylesheet" />
+    </head>
+
+    <body>
+        <div id="app" class="container">
+            <h1 class="title">
+                Test Cases
+            </h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="token">Query</th>
+                        <th>Results</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set vars={'counter': 1}  %}
+                    {% for row in rows.items() %}
+                    <tr>
+                        <td><b>{{vars.counter}}.</b> <small>{{row[0]}}</small></td>
+                        <td>
+                            {% for doc in row[1] %}
+                            ({{doc[0]}},<b>{{doc[1]}}</b>)
+                            {% endfor %}
+                            &nbsp;
+                        </td>
+                    </tr>
+                    {% if vars.update({'counter': vars.counter + 1}) %} {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <script src="/assets/js/extention/vue.js"></script>
+    </body>
+
+</html>
