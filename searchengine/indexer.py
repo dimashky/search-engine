@@ -21,12 +21,12 @@ stemmer = LancasterStemmer()
 stop_words = set(stopwords.words('english'))
 du_stop_words = [w for w in loader.loadFile('./storage/stop_words.txt').split('\n') if w]
 
-
 def index(fresh=False, dir='./docs/'):
     global index_table_cached
 
     if not fresh:
         if (index_table_cached):
+            print(len(index_table_cached))
             return index_table_cached
         index_table_cached = loader.loadJsonFile('./storage/index_table.json')
         if(index_table_cached):
@@ -78,21 +78,22 @@ def getTokens(txt):
     final_tokens = []
     tokens = word_tokenize(txt)
 
-    filtered_tokens = [w.translate(str.maketrans('', '', string.punctuation)) for w in tokens]
-    filtered_tokens = [w for w in filtered_tokens if not w in list(string.punctuation) + du_stop_words and is_ascii(w) and len(w)]
+    quantity_pattern = "((\d{1,3},\d{3})|(\d{1,3}))(-\w*)*"
+    abbreviation_pattern = "^(\D\.)+(\D)$"
+    filtered_tokens = [w.strip(string.punctuation) for w in tokens if not re.search(quantity_pattern, w)]
+    filtered_tokens = [w for w in filtered_tokens if not w in list(string.punctuation) + du_stop_words and is_ascii(w) and len(w) > 1]
 
     tokens_with_pos = [
         w for w in nltk.pos_tag(filtered_tokens) if w[1][0] in ["V", "N", "J", "R"]
     ]
 
-    for t in tokens_with_pos:
-        token = t[0]
-        pos = t[1]
+#Standford TOKEN TYPE
+#    stanford_tokens_pos = tagger.tag(tokens)
 
-# Standford TOKEN TYPE
-#        stanford_token_type = tagger.tag(token)[1]
-#        if (stanford_token_type in ["PERSON","ORGANIZATION","LOCATION"]):
-#            final_tokens.append((token, stanford_token_type))
+    for idx,(token,pos) in enumerate(tokens_with_pos):
+
+#        if (stanford_tokens_pos[idx][1] in ["PERSON","ORGANIZATION","LOCATION"]):
+#            final_tokens.append((token, stanford_tokens_pos[idx]))
 #            continue
 
         if (pos[0] == "V"):
