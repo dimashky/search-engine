@@ -9,7 +9,7 @@ def calc(tokens_with_pos, corpus_path = "./docs/"):
         pos = token_with_pos[1]
         relevance = 0
 
-        tf = (tokens.count((token)))
+        tf = 1 + math.log10(tokens.count((token)))
         idf = 1
 
         relevance = tf * idf

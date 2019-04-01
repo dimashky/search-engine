@@ -25,6 +25,6 @@ class AbbreviationResolver:
         abbrev_matches = re.findall(self.pattern, text)
         abbrev_matches = set([abbrev[0] for abbrev in abbrev_matches if abbrev[0].upper() in self.abbrev_keys])
         for abbrev in abbrev_matches:
-            text = text.replace(abbrev, self.abbrev[abbrev])
+            text = text.replace(abbrev, self.abbrev[abbrev.upper()])
         return text
         

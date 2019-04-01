@@ -1,8 +1,10 @@
-from searchengine import indexer
+from searchengine import indexer, abbreviation
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
 from scipy import spatial
+
+abbreviationResolver = abbreviation.AbbreviationResolver()
 
 def makeVector(document, dimensions):
     index_table = indexer.index()
@@ -71,6 +73,8 @@ def getCorrectWordUsingSoundexIndex(word):
 
 
 def match(query):
+    global abbreviationResolver
+    query = abbreviationResolver.replaceTextAbbreviation(query)
     query = query.lower()
     query_tokens = [token[0] for token in indexer.getTokens(query)]
     query_tokens = getCorrectQuery(query_tokens)
