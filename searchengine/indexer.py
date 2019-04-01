@@ -4,7 +4,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from collections import OrderedDict
 from nltk.tag.stanford import StanfordNERTagger
-from searchengine import loader, relevance
+from searchengine import loader, relevance, abbreviation
 ## import fuzzy
 
 # JAVA ENV
@@ -20,6 +20,7 @@ lemmatizer = WordNetLemmatizer()
 stemmer = LancasterStemmer()
 stop_words = set(stopwords.words('english'))
 du_stop_words = [w for w in loader.loadFile('./storage/stop_words.txt').split('\n') if w]
+abbreviationResolver = abbreviation.AbbreviationResolver()
 
 def index(fresh=False, dir='./docs/'):
     global index_table_cached
@@ -79,7 +80,7 @@ def getTokens(txt):
     tokens = word_tokenize(txt)
 
     quantity_pattern = "((\d{1,3},\d{3})|(\d{1,3}))(-\w*)*"
-    abbreviation_pattern = "^(\D\.)+(\D)$"
+
     filtered_tokens = [w.strip(string.punctuation) for w in tokens if not re.search(quantity_pattern, w)]
     filtered_tokens = [w for w in filtered_tokens if not w in list(string.punctuation) + du_stop_words and is_ascii(w) and len(w) > 1]
 
@@ -112,8 +113,8 @@ def is_ascii(s):
 
 def getDocTokens(filePath, with_relevance=True):
     doc_content = loader.loadFile(filePath)
-
-    tokens_with_pos = getTokens(doc_content)
+    content_replaced_abbreviation = abbreviationResolver.replaceTextAbbreviation(doc_content)
+    tokens_with_pos = getTokens(content_replaced_abbreviation)
     tokens = []
     if(with_relevance):
         tokens = relevance.calc(tokens_with_pos)

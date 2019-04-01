@@ -1,7 +1,10 @@
 {
-    "USA": "United States",
-    "US": "United States",
-    "UN": "United Nations",
-    "RU": "Russia",
-    "EU": "Europe"
+    "U.S.A": "united states",
+    "U.S": "united states",
+    "U.N": "united nations",
+    "C.I.A": "central intelligence agency",
+    "M.I.T": "massachusetts institute of technology",
+    "R.P.F":"Rassemblement pour la France",
+    "U.T.T": "The University of Trinidad and Tobago",
+    "U.A.R": "United Arab Republic"
 }
