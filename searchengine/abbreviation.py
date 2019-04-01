@@ -27,4 +27,6 @@ class AbbreviationResolver:
         for abbrev in abbrev_matches:
             text = text.replace(abbrev, self.abbrev[abbrev.upper()])
         return text
-        
+    
+    def isTerm(self, term_with_spaces):
+        return len([t for t in self.abbrev_keys if self.abbrev[t].lower() == term_with_spaces.lower()]) > 0

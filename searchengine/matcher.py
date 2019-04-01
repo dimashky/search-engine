@@ -77,6 +77,7 @@ def match(query):
     query = abbreviationResolver.replaceTextAbbreviation(query)
     query = query.lower()
     query_tokens = [token[0] for token in indexer.getTokens(query)]
+    query_tokens += indexer.nGramsHandler(query_tokens, 1)
     query_tokens = getCorrectQuery(query_tokens)
     query_vector = [1] * len(query_tokens)
     documents = getDocuments(query_tokens)

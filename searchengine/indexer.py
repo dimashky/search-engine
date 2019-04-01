@@ -19,7 +19,7 @@ index_table_cached = False
 lemmatizer = WordNetLemmatizer()
 stemmer = LancasterStemmer()
 stop_words = set(stopwords.words('english'))
-du_stop_words = [w for w in loader.loadFile('./storage/stop_words.txt').split('\n') if w]
+du_stop_words = [w.lower() for w in loader.loadFile('./storage/stop_words.txt').split('\n') if w]
 abbreviationResolver = abbreviation.AbbreviationResolver()
 
 def index(fresh=False, dir='./docs/'):
@@ -27,7 +27,6 @@ def index(fresh=False, dir='./docs/'):
 
     if not fresh:
         if (index_table_cached):
-            print(len(index_table_cached))
             return index_table_cached
         index_table_cached = loader.loadJsonFile('./storage/index_table.json')
         if(index_table_cached):
@@ -84,8 +83,12 @@ def getTokens(txt):
     filtered_tokens = [w.strip(string.punctuation) for w in tokens if not re.search(quantity_pattern, w)]
     filtered_tokens = [w for w in filtered_tokens if not w in list(string.punctuation) + du_stop_words and is_ascii(w) and len(w) > 1]
 
+    multi_terms = nGramsHandler(filtered_tokens)
+
     tokens_with_pos = [
         w for w in nltk.pos_tag(filtered_tokens) if w[1][0] in ["V", "N", "J", "R"]
+    ] + [
+        (w, "Noun") for w in multi_terms
     ]
 
 #Standford TOKEN TYPE
@@ -145,3 +148,20 @@ def soundexIndex():
 def getPhoneticHash(word):
     # soundex = fuzzy.Soundex(4)
     return word
+
+def nGramsHandler(terms, min_occurance = 3):
+    global abbreviationResolver
+
+    gram2 = list(nltk.ngrams(terms, 2))
+    gram2 = [g[0]+" "+g[1] for g in gram2 if not g[0] in du_stop_words and not g[1] in du_stop_words]
+
+    gram3 = list(nltk.ngrams(terms, 3))
+    gram3 = [g[0]+" "+g[1]+" "+g[2] for g in gram3 if not g[0] in du_stop_words and not g[2] in du_stop_words]
+    
+    gram4 = list(nltk.ngrams(terms, 4))
+    gram4 = [g[0]+" "+g[1]+" "+g[2]+" "+g[3] for g in gram4 if not g[0] in du_stop_words and not g[3] in du_stop_words]
+
+    grams = gram2 + gram3 + gram4
+    grams = [g for g in grams if grams.count(g) >= min_occurance or abbreviationResolver.isTerm(g)]
+
+    return grams
