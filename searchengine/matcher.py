@@ -48,8 +48,9 @@ def getDocuments(dimensions, date_dimenstions):
             docs = [doc[0] for doc in index_table[dim]]
             for doc in docs:
                 if (doc not in documents):
-                    documents[doc] = makeVector(
+                    v = makeVector(
                         doc, dimensions, date_dimenstions)
+                    documents[doc] = v / np.linalg.norm(v)
         for dim in date_dimenstions:
             for doc in dates_index[dim]:
                 if (doc not in documents):
