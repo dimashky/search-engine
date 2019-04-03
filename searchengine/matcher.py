@@ -1,11 +1,16 @@
 from searchengine import indexer
+from searchengine import loader
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
 from scipy import spatial
+import logging
+logger = logging.getLogger('ftpuploader')
 
-def makeVector(document, dimensions):
+
+def makeVector(document, dimensions, date_dimenstions):
     index_table = indexer.index()
+    dates_index = loader.loadJsonFile('./storage/dates_index.json')
     try:
         vector = []
         for dim in dimensions:
@@ -15,23 +20,43 @@ def makeVector(document, dimensions):
                     [doc[1] for doc in index_table[dim] if doc[0] == document][0])
             else:
                 vector.append(0)
-    except:
-        print("ex")
+        print("dim")
+        print(date_dimenstions)
+        for dim in date_dimenstions:
+            print(dim)
+            if(document in dates_index[dim]):
+                vector.append(1)
+            else:
+                vector.append(0)
+    except Exception as e:
+        logger.error('Failed to upload to ftp: ' + str(e))
+        print(logger)
+    print(document)
+    print(vector)
     return vector
 
 
-def getDocuments(dimensions):
+def getDocuments(dimensions, date_dimenstions):
     index_table = indexer.index()
+    dates_index = loader.loadJsonFile('./storage/dates_index.json')
     documents = {}
     try:
         for dim in dimensions:
             docs = [doc[0] for doc in index_table[dim]]
             for doc in docs:
                 if (doc not in documents):
-                    documents[doc] = makeVector(doc, dimensions)
+                    documents[doc] = makeVector(
+                        doc, dimensions, date_dimenstions)
+        for dim in date_dimenstions:
+            for doc in dates_index[dim]:
+                if (doc not in documents):
+                    documents[doc] = makeVector(
+                        doc, dimensions, date_dimenstions)
     except:
         pass
+    print(documents)
     return documents
+
 
 def getCorrectQuery(query_tokens):
     index_table = indexer.index()
@@ -61,6 +86,14 @@ def getCorrectWordUsingBigramIndex(word):
     return list(possible_words.keys())[0]
 
 
+def getCorrectDate(date_tokens):
+    dates_index = loader.loadJsonFile('./storage/dates_index.json')
+    # for d in date_tokens:
+    #  if(d not in dates_index.keys()):
+    #     date_tokens.remove(d)
+    return date_tokens
+
+
 def getCorrectWordUsingSoundexIndex(word):
     soundex_index = indexer.soundexIndex()
     phonetic_hash = indexer.getPhoneticHash(word)
@@ -74,12 +107,19 @@ def match(query):
     query = query.lower()
     query_tokens = [token[0] for token in indexer.getTokens(query)]
     query_tokens = getCorrectQuery(query_tokens)
-    query_vector = [1] * len(query_tokens)
-    documents = getDocuments(query_tokens)
+    query_date_tokens = indexer.extractDates(query)
+    query_date_tokens = getCorrectDate(query_date_tokens)
+
+    print(query_date_tokens)
+    query_vector = [1] * (len(query_tokens) + len(query_date_tokens))
+    print("vector query")
+    print(query_vector)
+    documents = getDocuments(query_tokens, query_date_tokens)
     relevance_document = {}
 
     for doc in documents:
-        relevance_document[doc] = cos_similarity = 1 - spatial.distance.cosine(query_vector, documents[doc])
+        relevance_document[doc] = cos_similarity = 1 - \
+            spatial.distance.cosine(query_vector, documents[doc])
         if(cos_similarity == 1):
             relevance_document[doc] = sum(documents[doc])/len(documents[doc])
 
