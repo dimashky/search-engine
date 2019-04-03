@@ -1,4 +1,4 @@
-from searchengine import indexer, abbreviation
+from searchengine import indexer, abbreviation, loader
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
