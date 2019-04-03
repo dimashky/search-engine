@@ -1,0 +1,58 @@
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="author" content="damascus university">
+        <title>Corpus</title>
+        <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
+        <link href="/assets/css/core.css" rel="stylesheet" />
+        <link href="/assets/css/search.css" rel="stylesheet" />
+        <link href="/assets/css/results.css" rel="stylesheet" />
+    </head>
+
+    <body>
+        <div class="results-container">
+            {% with errors = get_flashed_messages(category_filter=["error"]) %}
+            {% if errors %}
+            <div class="alert-message block-message error">
+                <a class="close" href="#">×</a>
+                <ul>
+                {%- for msg in errors %}
+                <li>{{ msg }}</li>
+                {% endfor -%}
+                </ul>
+            </div>
+            {% endif %}
+            {% endwith %}
+            <hr>
+            <div class="search-container">
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <div class="inner-form">
+                        <h3>New Document?</h3>
+                        <input type="file" name="files" accept=".txt" multiple/>
+                        <button class="btn-search" type="submit">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div class="results">
+                {% if results|length > 0  %}
+                {% set vars={'counter': 1}  %}
+                <h2>Uploaded Documents ({{results|length}} found)</h2>
+                {% for doc, content in results %}
+                <div class="result">
+                    <h4>{{vars['counter']}}. <a href="/docs/{{doc}}" target="_blank">{{doc}}</a></h4>
+                    <p>{{content}}</p>
+                </div>
+                {% if vars.update({'counter': vars.counter + 1}) %} {% endif %}
+                {% endfor %}
+                {% else %}
+                <h2 class="text-center">No Documents</h2>
+                {% endif %}
+            </div>
+        </div>
+    </body>
+
+</html>

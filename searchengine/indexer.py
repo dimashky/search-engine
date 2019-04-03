@@ -22,7 +22,7 @@ stop_words = set(stopwords.words('english'))
 du_stop_words = [w.lower() for w in loader.loadFile('./storage/stop_words.txt').split('\n') if w]
 abbreviationResolver = abbreviation.AbbreviationResolver()
 
-def index(fresh=False, dir='./docs/'):
+def index(fresh=False, dir='./docs/', selected_files = None):
     global index_table_cached
 
     if not fresh:
@@ -39,9 +39,16 @@ def index(fresh=False, dir='./docs/'):
     bigram_index = {}
     index_table = {}
 
+    if selected_files:
+        index_table = loader.loadJsonFile('./storage/index_table.json')
+        if not index_table:
+            index_table = {}
+
     files = loader.getFilesInDir(dir)
     for file in files:
-        print("Indexing File: " + dir + file)
+        if selected_files and file not in selected_files:
+            continue
+        print("Indexing File: " + (dir + file))
         tokens = getDocTokens(dir + file)
         for token in tokens:
 

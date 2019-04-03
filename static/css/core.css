@@ -818,3 +818,10 @@ html {
   .text-center{
     text-align: center;
   }
+
+  .menu{
+    display: flex; /* or inline-flex */ 
+    justify-content: space-around;
+    color: white;
+    font-size: 12px;
+  }

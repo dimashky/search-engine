@@ -42,5 +42,8 @@ def saveJsonFile(path, data):
         print("EXCEPTION: while save JSON file: "+path)
         return False
 
-def getFilesInDir(dir):
-    return [f for f in listdir(dir) if isfile(join(dir, f))]
+def getFilesInDir(dir, content = False, max_char = 200):
+    files = sorted([f for f in listdir(dir) if isfile(join(dir, f))], key=len)
+    if not content:
+        return files
+    return [(f, loadFile(dir + f)[:max_char].title() + " ...") for f in files]
