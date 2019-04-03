@@ -9,13 +9,16 @@ def calc(tokens_with_pos, corpus_path = "./docs/"):
         pos = token_with_pos[1]
         relevance = 0
 
-        tf = (tokens.count((token)))
+        term_count = tokens.count((token))
+        tf = 1 + math.log10(term_count)
         idf = 1
 
         relevance = tf * idf
 
         if(pos in ["PERSON","ORGANIZATION","LOCATION"]):
             relevance += (relevance / 10) # add some weight
+        if(token.count(" ") > 0):
+            relevance += 0 #term_count * 0.05 # add some weight
         
         tokens_with_relevance.append((token, relevance, pos))
     return tokens_with_relevance

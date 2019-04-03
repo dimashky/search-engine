@@ -8,9 +8,9 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from collections import OrderedDict
 from nltk.tag.stanford import StanfordNERTagger
-from searchengine import loader, relevance
 import datefinder
 import datetime
+from searchengine import loader, relevance, abbreviation
 ## import fuzzy
 
 # JAVA ENV
@@ -25,8 +25,9 @@ index_table_cached = False
 lemmatizer = WordNetLemmatizer()
 stemmer = LancasterStemmer()
 stop_words = set(stopwords.words('english'))
-du_stop_words = [w for w in loader.loadFile(
+du_stop_words = [w.lower() for w in loader.loadFile(
     './storage/stop_words.txt').split('\n') if w]
+abbreviationResolver = abbreviation.AbbreviationResolver()
 
 
 def index(fresh=False, dir='./docs/'):
@@ -105,19 +106,19 @@ def getTokens(txt):
     final_tokens = []
     tokens = word_tokenize(txt)
 
-    # date_pattern =  MONTHS_PATTERN + "(19\d\d)|(20\d\d)"
-    # print("Hello Date:")
-    # print(re.search(date_pattern,txt))
+    quantity_pattern = "((\d{1,3},\d{3})|(\d{1,3}))(-\w*)*"
 
-    #quantity_pattern = "((\d{1,3},\d{3})|(\d{1,3}))(-\w*)*"
-    #abbreviation_pattern = "^(\D\.)+(\D)$"
-    #filtered_tokens = [w.strip(string.punctuation) for w in tokens if not re.search(quantity_pattern, w)]
-    filtered_tokens = [w.strip(string.punctuation) for w in tokens]
-    filtered_tokens = [w for w in tokens if not w in list(
+    filtered_tokens = [w.strip(string.punctuation)
+                       for w in tokens if not re.search(quantity_pattern, w)]
+    filtered_tokens = [w for w in filtered_tokens if not w in list(
         string.punctuation) + du_stop_words and is_ascii(w) and len(w) > 1]
+
+    multi_terms = nGramsHandler(filtered_tokens)
 
     tokens_with_pos = [
         w for w in nltk.pos_tag(filtered_tokens) if w[1][0] in ["V", "N", "J", "R"]
+    ] + [
+        (w, "Noun") for w in multi_terms
     ]
 
 # Standford TOKEN TYPE
@@ -152,8 +153,9 @@ def getDocDates(filePath):
 
 def getDocTokens(filePath, with_relevance=True):
     doc_content = loader.loadFile(filePath)
-
-    tokens_with_pos = getTokens(doc_content)
+    content_replaced_abbreviation = abbreviationResolver.replaceTextAbbreviation(
+        doc_content)
+    tokens_with_pos = getTokens(content_replaced_abbreviation)
     tokens = []
     if(with_relevance):
         tokens = relevance.calc(tokens_with_pos)
@@ -203,3 +205,25 @@ def extractDates(txt):
     for date in matched_dates:
         formatted_dates.append(date.strftime("%d-%m-%Y"))
     return formatted_dates
+
+
+def nGramsHandler(terms, min_occurance=3):
+    global abbreviationResolver
+
+    gram2 = list(nltk.ngrams(terms, 2))
+    gram2 = [g[0]+" "+g[1] for g in gram2 if not g[0]
+             in du_stop_words and not g[1] in du_stop_words]
+
+    gram3 = list(nltk.ngrams(terms, 3))
+    gram3 = [g[0]+" "+g[1]+" "+g[2] for g in gram3 if not g[0]
+             in du_stop_words and not g[2] in du_stop_words]
+
+    gram4 = list(nltk.ngrams(terms, 4))
+    gram4 = [g[0]+" "+g[1]+" "+g[2]+" "+g[3]
+             for g in gram4 if not g[0] in du_stop_words and not g[3] in du_stop_words]
+
+    grams = gram2 + gram3 + gram4
+    grams = [g for g in grams if grams.count(
+        g) >= min_occurance or abbreviationResolver.isTerm(g)]
+
+    return grams

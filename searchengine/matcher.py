@@ -1,10 +1,13 @@
-from searchengine import indexer
-from searchengine import loader
+from searchengine import indexer, abbreviation
 from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
 from scipy import spatial
 import logging
+import numpy as np
+
+abbreviationResolver = abbreviation.AbbreviationResolver()
+
 logger = logging.getLogger('ftpuploader')
 
 
@@ -50,8 +53,9 @@ def getDocuments(dimensions, date_dimenstions):
         for dim in date_dimenstions:
             for doc in dates_index[dim]:
                 if (doc not in documents):
-                    documents[doc] = makeVector(
+                    v = makeVector(
                         doc, dimensions, date_dimenstions)
+                    documents[doc] = v / np.linalg.norm(v)
     except:
         pass
     print(documents)
@@ -104,8 +108,11 @@ def getCorrectWordUsingSoundexIndex(word):
 
 
 def match(query):
+    global abbreviationResolver
+    query = abbreviationResolver.replaceTextAbbreviation(query)
     query = query.lower()
     query_tokens = [token[0] for token in indexer.getTokens(query)]
+    query_tokens += indexer.nGramsHandler(query_tokens, 1)
     query_tokens = getCorrectQuery(query_tokens)
     query_date_tokens = indexer.extractDates(query)
     query_date_tokens = getCorrectDate(query_date_tokens)
