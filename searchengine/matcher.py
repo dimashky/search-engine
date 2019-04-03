@@ -3,6 +3,7 @@ from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
 from scipy import spatial
+import numpy as np
 
 abbreviationResolver = abbreviation.AbbreviationResolver()
 
@@ -30,7 +31,8 @@ def getDocuments(dimensions):
             docs = [doc[0] for doc in index_table[dim]]
             for doc in docs:
                 if (doc not in documents):
-                    documents[doc] = makeVector(doc, dimensions)
+                    v = makeVector(doc, dimensions)
+                    documents[doc] = v / np.linalg.norm(v)
     except:
         pass
     return documents

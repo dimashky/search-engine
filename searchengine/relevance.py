@@ -18,7 +18,7 @@ def calc(tokens_with_pos, corpus_path = "./docs/"):
         if(pos in ["PERSON","ORGANIZATION","LOCATION"]):
             relevance += (relevance / 10) # add some weight
         if(token.count(" ") > 0):
-            relevance += term_count * 0.05 # add some weight
+            relevance += 0 #term_count * 0.05 # add some weight
         
         tokens_with_relevance.append((token, relevance, pos))
     return tokens_with_relevance
