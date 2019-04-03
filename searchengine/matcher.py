@@ -3,45 +3,37 @@ from collections import OrderedDict
 from similarity.levenshtein import Levenshtein
 from operator import itemgetter
 from scipy import spatial
-import logging
 import numpy as np
+import traceback
 
 abbreviationResolver = abbreviation.AbbreviationResolver()
-
-logger = logging.getLogger('ftpuploader')
-
 
 def makeVector(document, dimensions, date_dimenstions):
     index_table = indexer.index()
     dates_index = loader.loadJsonFile('./storage/dates_index.json')
-    try:
-        vector = []
-        for dim in dimensions:
-            docs = [doc[0] for doc in index_table[dim]]
-            if (document in docs):
-                vector.append(
-                    [doc[1] for doc in index_table[dim] if doc[0] == document][0])
-            else:
-                vector.append(0)
-        print("dim")
-        print(date_dimenstions)
-        for dim in date_dimenstions:
-            print(dim)
-            if(document in dates_index[dim]):
-                vector.append(1)
-            else:
-                vector.append(0)
-    except Exception as e:
-        logger.error('Failed to upload to ftp: ' + str(e))
-        print(logger)
-    print(document)
-    print(vector)
+    if not dates_index: dates_index = {}
+    dates_index_keys = dates_index.keys()
+    vector = []
+    for dim in dimensions:
+        docs = [doc[0] for doc in index_table[dim]]
+        if (document in docs):
+            vector.append(
+                [doc[1] for doc in index_table[dim] if doc[0] == document][0])
+        else:
+            vector.append(0)
+    for dim in date_dimenstions:
+        if(dim in dates_index_keys and document in dates_index[dim]):
+            vector.append(1)
+        else:
+            vector.append(0)
     return vector
 
 
 def getDocuments(dimensions, date_dimenstions):
     index_table = indexer.index()
     dates_index = loader.loadJsonFile('./storage/dates_index.json')
+    if not dates_index: dates_index = {}
+    dates_index_keys = dates_index.keys()
     documents = {}
     try:
         for dim in dimensions:
@@ -52,14 +44,17 @@ def getDocuments(dimensions, date_dimenstions):
                         doc, dimensions, date_dimenstions)
                     documents[doc] = v / np.linalg.norm(v)
         for dim in date_dimenstions:
+            if not dim in dates_index_keys:
+                continue
             for doc in dates_index[dim]:
                 if (doc not in documents):
                     v = makeVector(
                         doc, dimensions, date_dimenstions)
                     documents[doc] = v / np.linalg.norm(v)
-    except:
-        pass
-    print(documents)
+    except Exception as e:
+        print("Exception in get Docs\n"+str(e))
+        traceback.print_exc()
+
     return documents
 
 
@@ -118,16 +113,12 @@ def match(query):
     query_date_tokens = indexer.extractDates(query)
     query_date_tokens = getCorrectDate(query_date_tokens)
 
-    print(query_date_tokens)
     query_vector = [1] * (len(query_tokens) + len(query_date_tokens))
-    print("vector query")
-    print(query_vector)
     documents = getDocuments(query_tokens, query_date_tokens)
     relevance_document = {}
 
     for doc in documents:
-        relevance_document[doc] = cos_similarity = 1 - \
-            spatial.distance.cosine(query_vector, documents[doc])
+        relevance_document[doc] = cos_similarity = 1 - spatial.distance.cosine(query_vector, documents[doc])
         if(cos_similarity == 1):
             relevance_document[doc] = sum(documents[doc])/len(documents[doc])
 

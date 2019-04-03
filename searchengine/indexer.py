@@ -14,11 +14,11 @@ from searchengine import loader, relevance, abbreviation
 ## import fuzzy
 
 # JAVA ENV
-java_path = "C:/Program Files/Java/jdk1.8.0_111/bin/java.exe"
-os.environ['JAVAHOME'] = java_path
-tagger = StanfordNERTagger('C:/Users/Lenovo/Desktop/stanford-ner/classifiers/english.muc.7class.distsim.crf.ser.gz',
-                           'C:/Users/Lenovo/Desktop/stanford-ner/stanford-ner.jar',
-                           encoding='utf-8')
+#java_path = "C:/Program Files/Java/jdk1.8.0_111/bin/java.exe"
+#os.environ['JAVAHOME'] = java_path
+#tagger = StanfordNERTagger('C:/Users/Lenovo/Desktop/stanford-ner/classifiers/english.muc.7class.distsim.crf.ser.gz',
+#                           'C:/Users/Lenovo/Desktop/stanford-ner/stanford-ner.jar',
+#                           encoding='utf-8')
 
 # GLOBAL VARIABLES
 index_table_cached = False

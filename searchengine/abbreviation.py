@@ -16,7 +16,7 @@ class AbbreviationResolver:
         return not re.search(self.pattern, term) is None
 
     def getAbbreviation(self, term):
-        if not self.isAbbreviation(term) and not term in self.abbrev_keys:
+        if not term in self.abbrev_keys:
             return term
 
         return self.abbrev[term].lower()
@@ -25,6 +25,8 @@ class AbbreviationResolver:
         abbrev_matches = re.findall(self.pattern, text)
         abbrev_matches = set([abbrev[0] for abbrev in abbrev_matches if abbrev[0].upper() in self.abbrev_keys])
         for abbrev in abbrev_matches:
+            text = text.replace(abbrev, self.abbrev[abbrev.upper()])
+        for abbrev in [k for k in self.abbrev_keys if not re.search(self.pattern, k)]:
             text = text.replace(abbrev, self.abbrev[abbrev.upper()])
         return text
     
