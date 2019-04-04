@@ -46,12 +46,13 @@ def index(fresh=False, dir='./docs/', selected_files = None):
     soundex_index = {}
     bigram_index = {}
     index_table = {}
+    terms_frequency = {}
     dates_index = {}
 
     if selected_files:
-        index_table = loader.loadJsonFile('./storage/index_table.json')
-        if not index_table:
-            index_table = {}
+        terms_frequency = loader.loadJsonFile('./storage/terms_frequency.json')
+        if not terms_frequency:
+            terms_frequency = {}
 
     files = loader.getFilesInDir(dir)
     for file in files:
@@ -65,14 +66,15 @@ def index(fresh=False, dir='./docs/', selected_files = None):
                 dates_index[date].append(file)
                 continue
             dates_index[date] = [file]
+        
         tokens = getDocTokens(dir + file)
         for token in tokens:
 
-            if token[0] in index_table.keys():
-                index_table[token[0]].append((file, token[1]))
+            if token[0] in terms_frequency.keys():
+                terms_frequency[token[0]].append((file, token[1]))
                 continue
 
-            index_table[token[0]] = [(file, token[1])]
+            terms_frequency[token[0]] = [(file, token[1])]
             soundex_index[token[0]] = getPhoneticHash(token[0])
             bigram = getBigramForWord(token[0])
             for c in bigram:
@@ -81,6 +83,7 @@ def index(fresh=False, dir='./docs/', selected_files = None):
                 else:
                     bigram_index[c].append(token[0])
 
+    index_table = relevance.getIndexTableWithIDF(terms_frequency, len(files))
     # sort the dictionary for binary search
     index_table = OrderedDict(sorted(index_table.items(), key=lambda t: t[0]))
     bigram_index = OrderedDict(
@@ -90,6 +93,7 @@ def index(fresh=False, dir='./docs/', selected_files = None):
 
     index_table_cached = index_table
     loader.saveJsonFile('./storage/index_table.json', index_table)
+    loader.saveJsonFile('./storage/terms_frequency.json', terms_frequency)
     loader.saveJsonFile('./storage/bigram_index.json', bigram_index)
     loader.saveJsonFile('./storage/soundex_index.json', soundex_index)
     loader.saveJsonFile('./storage/dates_index.json', dates_index)
@@ -164,7 +168,7 @@ def getDocTokens(filePath, with_relevance=True):
     tokens_with_pos = getTokens(content_replaced_abbreviation)
     tokens = []
     if(with_relevance):
-        tokens = relevance.calc(tokens_with_pos)
+        tokens = relevance.tf(tokens_with_pos)
     else:
         tokens = [token[0] for token in tokens_with_pos]
 
